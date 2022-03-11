@@ -1,8 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext} from "react";
 import Api from "../api"
 import { Link, useHistory} from "react-router-dom";
+import Cookies from "js-cookie";
+import { Context } from "./Context";
+
 
 export default ()=>{
+
+    const [user,setUser] = useContext(Context);
 
     let [name, setName] = useState("");
 
@@ -12,14 +17,15 @@ export default ()=>{
 
     let [materials, setMaterials] = useState("");
 
+    let [studentId, setStudentId] = useState(undefined);
+
+    let [students, setStudents] = useState([]);
+
     let [err, setErr] = useState([]);
 
     const history = useHistory();
 
-    useEffect(()=>{
-        check();
-
-    },[name, description, time, materials]);
+    let api = new Api();
 
     let check=()=>{
         setErr([]);
@@ -70,7 +76,8 @@ export default ()=>{
                name: name,
                description: description,
                time : time,
-               materials : materials
+               materials : materials,
+               created_by: studentId
            };
 
            let api = new Api();
@@ -86,6 +93,44 @@ export default ()=>{
            err.forEach(e=>alert(e));
        }
    }
+
+   let populateStudents= async()=>{
+
+    try{
+        let all = await api.getAllStudents();
+
+        if(all !=0){
+            setStudents(all);
+        }
+    }catch(e){
+        console.log(e);
+    }
+
+    }
+   
+    let handleIdStudent=()=>{
+        if(students && user){
+            students.forEach((e)=>{
+                if(e.email == user.email){
+                    setStudentId(e.id);
+                }
+            });
+        }
+    }
+
+    useEffect(()=>{
+        populateStudents();
+    },[]);
+
+
+    useEffect(()=>{
+        handleIdStudent();
+    },[students])
+
+    useEffect(()=>{
+        check();
+
+    },[name, description, time, materials]);
 
     return (
         <main className="course-create-main">
@@ -111,7 +156,7 @@ export default ()=>{
                 </section>
 
                 <section className="course-create-buttons">  
-                    <a onClick={add} className="create-course">Create Course</a>
+                    <a href="#" onClick={add} className="create-course">Create Course</a>
                     <Link to={"/"} className="cancel-course">Cancel</Link>
                 </section>
             </section>

@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext} from "react";
 import Api from "../api"
 import { Link, useHistory} from "react-router-dom";
 import { useParams } from "react-router-dom";
-
+import Cookies from "js-cookie";
+import { Context } from "./Context";
+import { useLocation } from "react-router-dom";
 
 export default ()=>{
+
+    const search = useLocation().search.slice(1);
+
+    const [user,setUser] = useContext(Context);
 
     let [name, setName] = useState("");
 
@@ -14,13 +20,58 @@ export default ()=>{
 
     let [materials, setMaterials] = useState("");
 
-    let [err, setErr] = useState([]);
+    let [createdBy, setCreatedBy] = useState("");
 
     let {id} = useParams();
 
+    let [studentName, setStudentName] = useState("");
+
+    let [studentId, setStudentId] = useState(undefined);
+
+    let [students, setStudents] = useState([]);
+
+    let [enrolments, setEnrolments] = useState([]);
+
     const history = useHistory();
+
     let api = new Api();
     
+    let populateStudents= async()=>{
+
+        try{
+            let all = await api.getAllStudents();
+
+            if(all !=0){
+                setStudents(all);
+            }
+        }catch(e){
+            console.log(e);
+        }
+
+    }
+
+    let populateEnrolments = async()=>{
+        try{
+            let rez = await api.getAllEnrolments();
+
+            if(rez !=0){
+                setEnrolments(rez);
+            }
+        }catch(e){
+            console.log(e);
+        }
+    }
+
+    let handleStudentName =()=>{
+        if(createdBy && students){
+            students.forEach(e=>{
+                if(e.id == createdBy){
+                    setStudentName(e.email);
+                }
+            })
+        }
+    }
+
     let setCourse = async(id)=>{
         let course = await api.getById(id);
 
@@ -28,11 +79,8 @@ export default ()=>{
         setDescription(course.description);
         setMaterials(course.materials);
         setTime(course.time);
+        setCreatedBy(course.created_by);
     }
-
-    useEffect(()=>{
-        setCourse(id);
-    },[]);
 
     let deleteCourse = async()=>{
         let rez = await api.delete(id);
@@ -42,18 +90,85 @@ export default ()=>{
             setDescription("");
             setMaterials("");
             setTime("");
+            setCreatedBy("");
             history.push("/");
         }else{
             alert(rez.message);
         }
     }
 
+    let handleIdStudent=()=>{
+        if(students && user){
+            students.forEach((e)=>{
+                if(e.email == user.email){
+                    setStudentId(e.id);
+                }
+            });
+        }
+    }
+
+    let handleLeaveCourse = ()=>{
+        if(studentId && enrolments){
+
+            enrolments.forEach(async(e)=>{
+                if(e.course_id == id && e.student_id == studentId){
+                    let rez = await api.deleteEnrolment(e.id);
+                    
+                    if(rez == "delete success"){
+                        history.push("/");
+                    }
+                }
+            })
+        }
+    }
+
+    let handleParticipa = async()=>{
+        if(studentId){
+            let obj = {
+                student_id : studentId,
+                course_id : id
+            }
+
+            let rez = await api.addEnrolment(obj);
+
+            if(rez == 'success'){
+                history.push("/");
+            }
+        }
+    }
+
+    useEffect(()=>{
+        setCourse(id);
+        populateStudents();
+        populateEnrolments();
+    },[]);
+
+    useEffect(()=>{
+        handleIdStudent();
+    },[students])
+
+    useEffect(()=>{
+        handleStudentName();
+    },[students, createdBy])
+
     return(
     <>
             <section className="course-actions">
-                <Link to={`/update/${id}`} className="update-course">Update Course</Link>
-                <a href="#" onClick={deleteCourse} className="delete-course">Delete Course</a>
-                <Link to={"/"} className="return">Return to List</Link>
+                {
+                    user && search=="owner"?<>
+                            <Link to={{pathname: `/update/${id}`, search:`${studentName}`}} className="update-course">Update Course</Link>
+                            <a href="#" onClick={deleteCourse} className="delete-course">Delete Course</a>
+                            <Link to={"/"} className="return">Return to List</Link>
+                        </>
+                        : user && search == "in"?<>
+                            <a href="#" onClick={handleLeaveCourse} className="leave">Leave Course</a>
+                            <Link to={"/"} className="return">Return to List</Link>
+                          </>
+                        :<>
+                            <a href="#" onClick={handleParticipa} className="participa">Join to Course</a>
+                            <Link to={"/"} className="return">Return to List</Link>
+                        </>
+                }
             </section>
 
             <section className="course-details-main">
@@ -64,8 +179,9 @@ export default ()=>{
                     <hr/>
                     <h1 className="title">{name}</h1>
 
-                    <h5 className="by">By $Joe Smith</h5>
+                    <h5 className="by">By {studentName}</h5>
 
+                    <p>Course Description:</p>
                     <p className="description">{description}</p>
                 </section>
 

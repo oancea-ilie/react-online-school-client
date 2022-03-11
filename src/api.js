@@ -19,6 +19,7 @@ export default class Api{
 
     }
 
+    // courses
     async getAll(){
         try{
             const rez = await this.api('http://localhost:5000/api/v1/courses');
@@ -106,6 +107,8 @@ export default class Api{
         
     }
 
+
+    // students
     async getAllStudents(){
         try{
             const rez = await this.api('http://localhost:5000/api/v1/students');
@@ -192,5 +195,96 @@ export default class Api{
         }
         
     }
+
+    // enrolments
+
+
+    async getAllEnrolments(){
+        try{
+            const rez = await this.api('http://localhost:5000/api/v1/enrolments');
+
+            if(rez.status === 200){
+                return rez.json();
+            }else{
+                return 0;
+            }
+
+        }catch(e){
+            throw new Error(e);
+        }
+        
+    }
+
+    async getEnrolmentById(id){
+        try{
+            const rez = await this.api(`http://localhost:5000/api/v1/enrolments/${id}`);
+
+            if(rez.status === 200){
+                return rez.json();
+            }else{
+                const data = await rez.json();
+                return data.error;
+            }
+
+        }catch(e){
+            throw new Error(e);
+        }
+        
+    }
+
+    async addEnrolment(newObj){
+        try{
+            const rez = await this.api(`http://localhost:5000/api/v1/enrolments`,'POST', newObj);
+            
+            if(rez.status === 204){
+                return "success";
+
+            }else{
+                const data = await rez.json();
+                return data.error;
+            }
+
+         }catch(e){
+           
+            throw new Error(e);
+         }
+        
+    }
+
+    async updateEnrolment(newObj,id){
+
+        try{
+            const rez = await this.api(`http://localhost:5000/api/v1/enrolments/${id}`,'PUT', newObj);
+
+            if(rez.status === 204){
+                return 'update success';
+            }else{
+                const data = await rez.json();
+                return data.error;
+            }
+
+        }catch(e){
+            throw new Error(e);
+        }
+        
+    }
+
+    async deleteEnrolment(id){
+        try{
+            const rez = await this.api(`http://localhost:5000/api/v1/enrolments/${id}`,'DELETE');
+
+            if(rez.status === 204){
+                return 'delete success';
+            }else{
+                const data = await rez.json();
+                return data.error;
+            }
+
+        }catch(e){
+            throw new Error(e);
+        }
+        
+    }
+
     
 }
