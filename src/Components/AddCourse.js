@@ -96,15 +96,22 @@ export default ()=>{
 
    let populateStudents= async()=>{
 
-    try{
-        let all = await api.getAllStudents();
+        try{
 
-        if(all !=0){
-            setStudents(all);
+            if(user){
+                let all = await api.getAllStudents(user);
+                if(all.message){
+                    history.push("/login");
+                }
+                if(all !=0){
+                    setStudents(all);
+                }
+            }else{
+                history.push("/login");
+            }
+        }catch(e){
+            console.log(e);
         }
-    }catch(e){
-        console.log(e);
-    }
 
     }
    

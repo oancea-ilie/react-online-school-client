@@ -19,10 +19,12 @@ export default ()=>{
     let populateCourses = async()=>{
 
         try{
-            let rez = await api.getAll();
+            if(user){
+                let rez = await api.getAll(user);
 
-            if(rez != 0){
-                setCourses(rez);
+                if(rez != 0){
+                    setCourses(rez);
+                }
             }
         }catch(e){
             console.log(e);
@@ -55,7 +57,9 @@ export default ()=>{
                         <p className="new-course">New Course</p>
                     </Link>
                 </main>
-                : <h1 className="user-not">Trebuie sa fii logat prima data !</h1>
+                : <section className="home-nelogat">
+                    <h1 className="user-not">Trebuie sa fii logat prima data !</h1>
+                </section>
             }
         </>
     );

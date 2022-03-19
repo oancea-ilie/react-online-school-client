@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 
 export default class Api{
     
@@ -19,10 +20,39 @@ export default class Api{
 
     }
 
+    api2(path, method ='GET', body= null,requiresAuth=false,credentials=null){
+        let url = path;
+
+        const options={
+            method,
+            headers:{
+                'Content-Type':'application/json;charset=utf-8'
+            }
+        };
+
+
+
+        if(body !=null){
+            options.body = JSON.stringify(body);
+        }
+        if(requiresAuth){
+            const encodedCredentials=
+            Buffer.from(`${credentials.username}:${credentials.password}`).toString('base64');
+            options.headers['Authorization']= `Basic ${encodedCredentials}`;
+        }
+
+        return fetch(url,options);
+    }
+
+
+
     // courses
-    async getAll(){
+    async getAll(user){
         try{
-            const rez = await this.api('http://localhost:5000/api/v1/courses');
+            const rez = await this.api2('http://localhost:5000/api/v1/courses','GET',null,true,{
+                username:user.email,
+                password:user.password
+            });
 
             if(rez.status === 200){
                 return rez.json();
@@ -36,11 +66,14 @@ export default class Api{
         
     }
 
-    async getById(id){
+    async getByIdAuth(id,user){
         try{
-            const rez = await this.api(`http://localhost:5000/api/v1/courses/${id}`);
+            const rez = await this.api2(`http://localhost:5000/api/v1/courses/${id}`,'GET',null,true,{
+                username:user.email,
+                password:user.password
+            });
 
-            if(rez.status === 200){
+            if(rez.status === 200 || rez.status === 401){
                 return rez.json();
             }else{
                 const data = await rez.json();
@@ -109,11 +142,14 @@ export default class Api{
 
 
     // students
-    async getAllStudents(){
+    async getAllStudents(user){
         try{
-            const rez = await this.api('http://localhost:5000/api/v1/students');
+            const rez = await this.api2('http://localhost:5000/api/v1/students','GET',null,true,{
+                username:user.email,
+                password:user.password
+            });
 
-            if(rez.status === 200){
+            if(rez.status === 200 || rez.status === 401){
                 return rez.json();
             }else{
                 return 0;
@@ -198,12 +234,14 @@ export default class Api{
 
     // enrolments
 
-
-    async getAllEnrolments(){
+    async getAllEnrolments(user){
         try{
-            const rez = await this.api('http://localhost:5000/api/v1/enrolments');
+            const rez = await this.api2('http://localhost:5000/api/v1/enrolments','GET',null,true,{
+                username:user.email,
+                password:user.password
+            });
 
-            if(rez.status === 200){
+            if(rez.status === 200 || rez.status === 401){
                 return rez.json();
             }else{
                 return 0;
@@ -275,6 +313,22 @@ export default class Api{
 
             if(rez.status === 204){
                 return 'delete success';
+            }else{
+                const data = await rez.json();
+                return data.error;
+            }
+
+        }catch(e){
+            throw new Error(e);
+        }
+        
+    }
+
+    async login(obj){
+        try{
+            const rez = await this.api(`http://localhost:5000/api/v1/students/login`,'POST',obj);
+            if(rez.status == 200){
+                return rez.json();
             }else{
                 const data = await rez.json();
                 return data.error;

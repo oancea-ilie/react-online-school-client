@@ -39,10 +39,18 @@ export default ()=>{
     let populateStudents= async()=>{
 
         try{
-            let all = await api.getAllStudents();
 
-            if(all !=0){
-                setStudents(all);
+            if(user){
+                let all = await api.getAllStudents(user);
+
+                if(all.message){
+                    history.push("/login");
+                }
+                if(all !=0){
+                    setStudents(all);
+                }
+            }else{
+                history.push("/login");
             }
         }catch(e){
             console.log(e);
@@ -52,10 +60,16 @@ export default ()=>{
 
     let populateEnrolments = async()=>{
         try{
-            let rez = await api.getAllEnrolments();
-
-            if(rez !=0){
-                setEnrolments(rez);
+            if(user){
+                let rez = await api.getAllEnrolments(user);
+                if(rez.message){
+                    history.push("/login");
+                }
+                if(rez !=0){
+                    setEnrolments(rez);
+                }
+            }else{
+                history.push("/login")
             }
         }catch(e){
             console.log(e);
@@ -73,13 +87,21 @@ export default ()=>{
     }
 
     let setCourse = async(id)=>{
-        let course = await api.getById(id);
+        if(user){
+            let course = await api.getByIdAuth(id,user);
 
-        setName(course.name);
-        setDescription(course.description);
-        setMaterials(course.materials);
-        setTime(course.time);
-        setCreatedBy(course.created_by);
+            if(course.message){
+                history.push("/login");
+            }
+            
+            setName(course.name);
+            setDescription(course.description);
+            setMaterials(course.materials);
+            setTime(course.time);
+            setCreatedBy(course.created_by);
+        }else{
+            history.push("/login");
+        }
     }
 
     let deleteCourse = async()=>{

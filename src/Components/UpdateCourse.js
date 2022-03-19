@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Api from "../api"
 import { Link, useHistory} from "react-router-dom";
 import { useParams } from "react-router-dom";
 import Loader from "./Spinner";
 import Errors from "./Errors";
 import { useLocation } from "react-router-dom";
+import { Context } from "./Context";
 
 export default ()=>{
 
     const search = useLocation().search.slice(1);
-    
+
+    const [user,setUser] = useContext(Context);
+
     let [name, setName] = useState("");
 
     let [description, setDescription] = useState("");
@@ -34,18 +37,25 @@ export default ()=>{
 
     let getCourse = async(id)=>{
 
-        let course = await api.getById(id);
+       if(user){
+            let course = await api.getByIdAuth(id,user);
 
-        if(course.message == null){
-            setName(course.name);
-            setDescription(course.description);
-            setMaterials(course.materials);
-            setTime(course.time);
+            if(course.message){
+                history.push("/login");
+            }
+            if(course.message == null){
+                setName(course.name);
+                setDescription(course.description);
+                setMaterials(course.materials);
+                setTime(course.time);
 
-            setLoading(false);
-        }else{
-            setErrors(course.message);
-        }
+                setLoading(false);
+            }else{
+                setErrors(course.message);
+            }
+       }else{
+           history.push("/login");
+       }
     }
 
 

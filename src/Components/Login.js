@@ -50,21 +50,19 @@ export default ()=>{
 
     let loginHandle= async()=>{
         check();
+        let obj = {email: email, password: pass};
 
         if(err == ''){
-            let allStudents = await api.getAllStudents();
-            let ok = 0;
-            allStudents.forEach((e)=>{
-                if(e.email == email && e.password == pass){
-                    setUser({email:email,password:pass});
-                    history.push("/");
-                    ok = 1;
-                }
-            });
 
-            if(ok == 0){
-                alert('Nume sau parola gresita!');
+            let loginStatus = await api.login(obj);
+
+            if(loginStatus.message == "success"){
+                setUser(obj);
+                history.push("/");
+            }else{
+                alert("Nume sau parola gresita!");
             }
+
 
         }else{
             err.forEach((e)=>alert(e));

@@ -503,6 +503,8 @@ header a:hover {
 }
 @media (min-width: 768px) {
   .course-details-main {
+    max-width: 800px;
+    margin: 2rem auto;
     grid-template-columns: 60% 32%;
     grid-template-areas: "h1 h1" "course-details course-time";
     grid-row-gap: 2rem;
@@ -514,6 +516,7 @@ header a:hover {
 }
 @media (min-width: 1024px) {
   .course-details-main {
+    max-width: 1200px;
     grid-template-columns: 70% 25%;
   }
 }
@@ -712,8 +715,11 @@ header a:hover {
 }
 @media (min-width: 768px) {
   .course-actions {
+    max-width: 800px;
+    margin: 0 auto;
     height: 130px;
     grid-template-columns: 1fr 1fr;
+    border-radius: 0 0 15px 15px;
   }
   .course-actions a {
     width: 80%;
@@ -722,6 +728,7 @@ header a:hover {
 }
 @media (min-width: 1024px) {
   .course-actions {
+    max-width: 1200px;
     height: 100px;
     grid-template-columns: 1fr 1fr 1fr;
   }
@@ -1133,18 +1140,18 @@ header a:hover {
 
 .owner-div{
   height: 10px;
-  width: 110px;
-  transform: rotate(60deg);
+  width: 145px;
+  transform: rotate(70deg);
   background-color: white;
   position: absolute;
-  top: 35px;
-  right: -27px;
+  top: 60px;
+  right: -50px;
 }
 
 .owner-div p{
   color: yellow;
   margin-top: 0.8rem;
-  margin-left: 1.3rem;
+  margin-left: 2rem;
 }
 
 .in-div{
@@ -1192,5 +1199,23 @@ header a:hover {
   border: 2px solid #250946;
   text-align: center;
   margin: 2rem auto;
+}
+.nr-cursanti{
+  font-size: 1.1rem !important;
+  color: #0da30d;
+  padding: 0.4rem 0!important;
+}
+.nr-cursanti-red{
+  font-size: 1.1rem !important;
+  color: red;
+  padding: 0.4rem 0!important;
+}
+
+.home-nelogat{
+  width: 100%;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 /*# sourceMappingURL=style.css.map */

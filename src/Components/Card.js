@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Api from "../api"
 import Cookies from "js-cookie";
 import { Context } from "./Context";
+import { useHistory } from "react-router-dom";
 
 export default ({obj})=>{
     let id= obj[0];
@@ -16,20 +17,29 @@ export default ({obj})=>{
 
     let [enrolments, setEnrolments] = useState([]);
 
+    let [countCursanti, setCountCursanti] = useState(0);
+
     let [studentId, setStudentId] = useState(0);
 
     let [status, setStatus] = useState("");
 
     let api = new Api();
 
+    let history = useHistory();
 
     let populateStudents= async()=>{
 
         try{
-            let all = await api.getAllStudents();
-
-            if(all !=0){
-                setStudents(all);
+            if(user){
+                let all = await api.getAllStudents(user);
+                if(all.message){
+                    history.push("/login")
+                }
+                if(all !=0){
+                    setStudents(all);
+                }   
+            }else{
+                history.push("login");
             }
         }catch(e){
             console.log(e);
@@ -39,10 +49,16 @@ export default ({obj})=>{
 
     let populateEnrolments = async()=>{
         try{
-            let rez = await api.getAllEnrolments();
-
-            if(rez !=0){
-                setEnrolments(rez);
+            if(user){
+                let rez = await api.getAllEnrolments(user);
+                if(rez.message){
+                    history.push("/login");
+                }
+                if(rez !=0){
+                    setEnrolments(rez);
+                }
+            }else{
+                history.push("/login");
             }
         }catch(e){
             console.log(e);
@@ -81,10 +97,25 @@ export default ({obj})=>{
         }
     }
 
+
+    let handleCursanti=()=>{
+        if(enrolments){
+            enrolments.forEach((e)=>{
+               if(e.course_id == id){
+                   setCountCursanti((prev)=>prev+1);
+               } 
+            });
+        }
+    }
     useEffect(()=>{
         populateStudents();
         populateEnrolments();
     },[]);
+
+
+    useEffect(()=>{
+        handleCursanti();
+    },[enrolments]);
 
     useEffect(()=>{
         handleIdStudent();
@@ -109,16 +140,28 @@ export default ({obj})=>{
                  status =="owner"?<Link to={{pathname:`/view-course/${id}`, search:`${status}`}} className="home-card owner-card">
                         <div className="owner-div"> <p>Owner</p> </div>
                         <p className="home-course">Course</p>
+                        {
+                            countCursanti == 0?<p className="nr-cursanti-red">{countCursanti} Cursanti</p>
+                            :<p className="nr-cursanti">{countCursanti} Cursanti</p>
+                        }
                         <h3 className="courseName">{name}</h3>
                     </Link>
                 :status =="in"?<Link to={{pathname:`/view-course/${id}`, search:`${status}`}} className="home-card in">
                         <div className="in-div"></div>
                         <p className="home-course">Course</p>
+                        {
+                            countCursanti == 0?<p className="nr-cursanti-red">{countCursanti} Cursanti</p>
+                            :<p className="nr-cursanti">{countCursanti} Cursanti</p>
+                        }
                         <h3 className="courseName">{name}</h3>
                     </Link>
                 :status =="out"?<Link to={{pathname:`/view-course/${id}`, search:`${status}`}}className="home-card not-yet">
                         <div className="not-yet-div"></div>
                         <p className="home-course">Course</p>
+                        {
+                            countCursanti == 0?<p className="nr-cursanti-red">{countCursanti} Cursanti</p>
+                            :<p className="nr-cursanti">{countCursanti} Cursanti</p>
+                        }
                         <h3 className="courseName">{name}</h3>
                     </Link>: ''
             }
